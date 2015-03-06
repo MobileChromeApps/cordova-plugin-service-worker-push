@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+	   id="org.apache.cordova.push"
+      version="0.0.1-dev">
+    <name>Push</name>
+    <description>Push Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova,push</keywords>
+
+    <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
+
+    <!-- JSmodule clobbering -->
+
+    <!-- Assets for use by service worker -->
+
+    <platform name="ios">
+	<config-file target="config.xml" parent="/*">
+	    <feature name="Push">
+		<param name="ios-package" value="CDVPush" />
+	    </feature>
+	</config-file>
+	<header-file src="src/ios/CDVPush.h" />
+	<source-file src="src/ios/CDVPush.m" />
+    </platform>
+</plugin>
