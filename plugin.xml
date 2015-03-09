@@ -10,14 +10,26 @@
     <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
 
     <!-- JSmodule clobbering -->
+    <js-module src="www/PushManager.js" name="PushManager">
+	<clobbers target="PushManager" />
+    </js-module>
+    <js-module src="www/PushSubscription.js" name="PushSubscription">
+	<clobbers target="PushSubscription" />
+    </js-module>
 
     <!-- Assets for use by service worker -->
+    <asset src="www/sw_assets/pushevent.js" target="sw_assets/pushevent.js" />
 
     <platform name="ios">
 	<config-file target="config.xml" parent="/*">
 	    <feature name="Push">
 		<param name="ios-package" value="CDVPush" />
 	    </feature>
+	</config-file>
+	<config-file target="*-Info.plist" parent="UIBackgroundModes">
+	    <array>
+		<string>remote-notification</string>
+	    </array>
 	</config-file>
 	<header-file src="src/ios/CDVPush.h" />
 	<source-file src="src/ios/CDVPush.m" />
