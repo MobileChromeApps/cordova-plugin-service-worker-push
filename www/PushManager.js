@@ -30,16 +30,20 @@ PushManager.prototype.getSubscription = function() {
 PushManager.prototype.hasPermission = function() {
     return new Promise(function(resolve, reject) {
 	var success = function() {
-
+	    console.log("success");
+	    resolve(true);
 	};
 	var failure = function(err) {
+	    console.log("failure");
 	    reject(err);
 	};
+	exec(success, failure, "Push", "hasPermission", []);
     });
 };
 
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
     serviceWorkerRegistration.pushManager = new PushManager();
+    exec(null, null, "Push", "setupPush", []);
 });
 
 module.exports = PushManager;

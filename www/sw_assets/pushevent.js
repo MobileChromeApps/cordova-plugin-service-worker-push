@@ -24,7 +24,13 @@ PushEvent.prototype = new ExtendableEvent('push');
 PushSubscriptionChangeEvent = new ExtendableEvent('pushsubscriptionchange');
 
 FirePushEvent = function(data) {
-
+    var ev = new PushEvent();
+    dispatchEvent(ev);
+    if (ev.promises instanceof Array) {
+	//call completion handler with success
+    } else {
+	// call completion handler with failure
+    }
 };
 
 FirePushSubscriptionChangeEvent(data) {
