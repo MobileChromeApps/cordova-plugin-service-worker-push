@@ -9,7 +9,6 @@
 
     <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
 
-    <!-- JSmodule clobbering -->
     <js-module src="www/PushManager.js" name="PushManager">
 	<clobbers target="PushManager" />
     </js-module>

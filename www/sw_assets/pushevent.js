@@ -33,6 +33,6 @@ FirePushEvent = function(data) {
     }
 };
 
-FirePushSubscriptionChangeEvent(data) {
+FirePushSubscriptionChangeEvent = function(data) {
 
 };
