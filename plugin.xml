@@ -19,6 +19,7 @@
 
     <!-- Assets for use by service worker -->
     <asset src="www/sw_assets/pushevent.js" target="sw_assets/pushevent.js" />
+    <asset src="www/sw_assets/PushMessageDataAsset.js" target="sw_assets/PushMessageDataAsset.js" />
 
     <platform name="ios">
 	<config-file target="config.xml" parent="/*">

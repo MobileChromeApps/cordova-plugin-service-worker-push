@@ -22,7 +22,9 @@
 
 @implementation CDVPush
 
-- (void)setupPush:(CDVInvokedUrlCommand*)command
+@synthesize completionHandler;
+
+- (void)setupPush
 {
     NSLog(@"Setting up Push");
     if ([[UIApplication sharedApplication] respondsToSelector:@selector(registerUserNotificationSettings:)])
@@ -36,16 +38,25 @@
     }
 }
 
+- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+{
+    [application registerForRemoteNotifications];
+    NSLog(@"Registered for Remote Notifications");
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
+{
+    
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+    
+}
+
 - (void)hasPermission:(CDVInvokedUrlCommand*)command
 {
-    BOOL hasPermission;
-    if ([[UIApplication sharedApplication] respondsToSelector:@selector(isRegisteredForRemoteNotifications)])
-    {
-        hasPermission = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
-    } else {
-        hasPermission = [[UIApplication sharedApplication] enabledRemoteNotificationTypes] & UIRemoteNotificationTypeAlert;
-    }
-    if  (hasPermission) {
+    if  ([self hasPermission]) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
@@ -54,11 +65,39 @@
     }
 }
 
-- (void)application:(UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
+- (void)subscribe:(CDVInvokedUrlCommand*)command
 {
-    [application registerForRemoteNotifications];
-    NSLog(@"Registered for Remote Notifications");
+    [self setupPush];
+    if  ([self hasPermission]) {
+        //TODO: subscribe
+        
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"PermissionDeniedError"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    }
+    
 }
 
+- (BOOL)hasPermission
+{
+    BOOL hasPermission;
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(isRegisteredForRemoteNotifications)])
+    {
+        hasPermission = [[UIApplication sharedApplication] isRegisteredForRemoteNotifications];
+    } else {
+        hasPermission = [[UIApplication sharedApplication] enabledRemoteNotificationTypes] & UIRemoteNotificationTypeAlert;
+    }
+    return hasPermission;
+}
+
+- (NSString *)uuid
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    CFStringRef uuidString = CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return (__bridge_transfer NSString *)uuidString;
+}
 @end
 

@@ -13,6 +13,7 @@ PushManager.prototype.subscribe = function() {
 	var failure = function(err) {
 	    reject(err);
 	};
+	exec(success, failure, "Push", "subscribe", []);
     });
 };
 
@@ -43,7 +44,7 @@ PushManager.prototype.hasPermission = function() {
 
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
     serviceWorkerRegistration.pushManager = new PushManager();
-    exec(null, null, "Push", "setupPush", []);
+    //exec(null, null, "Push", "setupPush", []);
 });
 
 module.exports = PushManager;

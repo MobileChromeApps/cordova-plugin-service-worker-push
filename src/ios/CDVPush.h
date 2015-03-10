@@ -22,4 +22,8 @@
 
 @interface CDVPush : CDVPlugin {}
 
+typedef void(^Completion)(UIBackgroundFetchResult);
+
+@property (nonatomic, copy) Completion completionHandler;
+
 @end
