@@ -1,19 +1,23 @@
 var exec = require('cordova/exec');
 var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
 
-PushManager = function() {
-    return this;
-};
+PushManager = function() {};
 
 PushManager.prototype.subscribe = function() {
     return new Promise(function(resolve, reject) {
 	var success = function() {
-
+	    resolve(new PushSubscription(token));
 	};
 	var failure = function(err) {
 	    reject(err);
 	};
-	exec(success, failure, "Push", "subscribe", []);
+	window.plugins.pushNotification.register(success, failure, 
+	{
+	    "badge":"true",
+	    "sound":"true",
+	    "alert":"true",
+	    "ecb":null
+	});
     });
 };
 
@@ -30,12 +34,15 @@ PushManager.prototype.getSubscription = function() {
 
 PushManager.prototype.hasPermission = function() {
     return new Promise(function(resolve, reject) {
-	var success = function() {
-	    console.log("success");
-	    resolve(true);
+	var success = function(status) {
+	    if (status === "granted") {
+		resolve(0);
+	    }
+	    if (status === "denied") {
+		resolve(1);
+	    }
 	};
 	var failure = function(err) {
-	    console.log("failure");
 	    reject(err);
 	};
 	exec(success, failure, "Push", "hasPermission", []);

@@ -25,5 +25,6 @@
 typedef void(^Completion)(UIBackgroundFetchResult);
 
 @property (nonatomic, copy) Completion completionHandler;
+@property (nonatomic, strong) CDVServiceWorker *serviceWorker;
 
 @end
