@@ -5,7 +5,8 @@ PushManager = function() {};
 
 PushManager.prototype.subscribe = function() {
     return new Promise(function(resolve, reject) {
-	var success = function() {
+	var success = function(token) {
+	    exec(null, null, "Push", "storeDeviceToken", [token]);
 	    resolve(new PushSubscription(token));
 	};
 	var failure = function(err) {
@@ -23,12 +24,13 @@ PushManager.prototype.subscribe = function() {
 
 PushManager.prototype.getSubscription = function() {
     return new Promise(function(resolve, reject) {
-	var success = function() {
-	
+	var success = function(token) {
+	    resolve(new PushSubscription(token));
 	};
 	var failure = function(err) {
 	    reject(err);
 	};
+	exec(success, failure, "Push", "getDeviceToken", []);
     });
 };
 
@@ -51,7 +53,7 @@ PushManager.prototype.hasPermission = function() {
 
 navigator.serviceWorker.ready.then(function(serviceWorkerRegistration) {
     serviceWorkerRegistration.pushManager = new PushManager();
-    //exec(null, null, "Push", "setupPush", []);
+    exec(null, null, "Push", "setupPush", []);
 });
 
 module.exports = PushManager;
