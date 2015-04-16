@@ -5,52 +5,32 @@ function PushManager() {}
 
 PushManager.prototype.subscribe = function() {
     return new Promise(function(resolve, reject) {
-	var success = function(token) {
+	function callback(token) {
 	    exec(null, null, "Push", "storeDeviceToken", [token]);
 	    resolve(new PushSubscription(token));
-	};
-	var failure = function(err) {
-	    reject(err);
-	};
-	function testCallback() {
-	    console.log("ECB was called");
 	}
-	window.plugins.pushNotification.register(success, failure, 
+	window.plugins.pushNotification.register(callback, reject, 
 	{
 	    "badge":"true",
 	    "sound":"true",
 	    "alert":"true",
-	    "ecb":"testCallback"
+	    "ecb":""
 	});
     });
 };
 
 PushManager.prototype.getSubscription = function() {
     return new Promise(function(resolve, reject) {
-	var success = function(token) {
+	function callback(token) {
 	    resolve(new PushSubscription(token));
-	};
-	var failure = function(err) {
-	    reject(err);
-	};
-	exec(success, failure, "Push", "getDeviceToken", []);
+	}
+	exec(callback, reject, "Push", "getDeviceToken", []);
     });
 };
 
 PushManager.prototype.hasPermission = function() {
     return new Promise(function(resolve, reject) {
-	var success = function(status) {
-	    if (status === "granted") {
-		resolve(PushPermissionStatus.granted);
-	    }
-	    if (status === "denied") {
-		resolve(PushPermissionStatus.denied);
-	    }
-	};
-	var failure = function(err) {
-	    reject(err);
-	};
-	exec(success, failure, "Push", "hasPermission", []);
+	exec(resolve, reject, "Push", "hasPermission", []);
     });
 };
 

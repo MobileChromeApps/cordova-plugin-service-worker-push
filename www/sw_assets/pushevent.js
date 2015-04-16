@@ -12,15 +12,23 @@ Object.defineProperty(this, 'onpushsubscriptionchange', {
     set: eventSetter('pushsubscriptionchange')
 });
 
-PushEvent = function() {};
+function PushEvent () {
+    ExtendableEvent.call(this, 'push');
+}
 
-PushSubscriptionChangeEvent = function() {};
+function PushSubscriptionChangeEvent () {
+    ExtendableEvent.call(this, 'pushsubscriptionchange');
+}
 
-PushEvent.prototype = new ExtendableEvent('push');
-PushSubscriptionChangeEvent = new ExtendableEvent('pushsubscriptionchange');
+PushEvent.prototype = Object.create(ExtendableEvent.prototype);
+PushEvent.constructor = PushEvent;
 
-FirePushEvent = function(data) {
+PushSubscriptionChangeEvent.prototype = Object.create(ExtendableEvent.prototype);
+PushSubscriptionChangeEvent.constructor = PushSubscriptionChangeEvent;
+
+function FirePushEvent(data) {
     var ev = new PushEvent();
+    ev.data = data;
     dispatchEvent(ev);
     if (ev.promises instanceof Array) {
 	return Promise.all(ev.promises).then(function() {
@@ -31,8 +39,8 @@ FirePushEvent = function(data) {
     } else {
 	sendSyncResponse(2);
     }
-};
+}
 
-FirePushSubscriptionChangeEvent = function(data) {
-
-};
+function FirePushSubscriptionChangeEvent(data) {
+    dispatchEvent(new PushSubscriptionChangeEvent());
+}

@@ -44,14 +44,6 @@ CDVPush *this;
 - (void)setupPushHandlers
 {
     this = self;
-    if ([[[UIApplication sharedApplication] delegate] respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
-        Method original, swizzled;
-        original = class_getInstanceMethod([self class], @selector(application:didReceiveRemoteNotification:));
-        swizzled = class_getInstanceMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:));
-        method_exchangeImplementations(original, swizzled);
-    } else {
-        class_addMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:), class_getMethodImplementation([self class], @selector(application:didReceiveRemoteNotification:)), nil);
-    }
     if ([[[UIApplication sharedApplication] delegate] respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
         Method original, swizzled;
         original = class_getInstanceMethod([self class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:));
@@ -79,15 +71,9 @@ CDVPush *this;
     }
 }
 
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
-{
-    NSLog(@"Received remote notification");
-    [this dispatchPushEvent:userInfo];
-}
-
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
-    NSLog(@"Received background remote notification");
+    NSLog(@"Received Remote notification");
     this.completionHandler = completionHandler;
     [this dispatchPushEvent:userInfo];
 }
@@ -100,6 +86,11 @@ CDVPush *this;
     [this.serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
 }
 
+- (void)dispatchSubscriptionChangeEvent
+{
+    [this.serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:@"FirePushSubscriptionChangeEvent();" waitUntilDone:NO];
+}
+
 - (void)setupSyncResponse
 {
     __weak CDVPush *weakSelf = self;
@@ -107,12 +98,15 @@ CDVPush *this;
         UIBackgroundFetchResult result;
         switch ([responseType toInt32]) {
             case 0:
+                NSLog(@"Fetched New Data");
                 result = UIBackgroundFetchResultNewData;
                 break;
             case 1:
+                NSLog(@"Failed to get Data");
                 result = UIBackgroundFetchResultFailed;
                 break;
             default:
+                NSLog(@"Fetched No Data");
                 result = UIBackgroundFetchResultNoData;
                 break;
         }
@@ -126,8 +120,10 @@ CDVPush *this;
 - (void)storeDeviceToken:(CDVInvokedUrlCommand*)command
 {
     NSString *deviceToken = [command argumentAtIndex:0];
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    [defaults setObject:deviceToken forKey:DEVICE_TOKEN_STORAGE_KEY];
+    NSString *oldToken = [[NSUserDefaults standardUserDefaults] objectForKey:DEVICE_TOKEN_STORAGE_KEY];
+    if (![oldToken isEqualToString:deviceToken]) {
+        [self dispatchSubscriptionChangeEvent];
+    }
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -153,15 +149,6 @@ CDVPush *this;
     } else {
         return [[UIApplication sharedApplication] enabledRemoteNotificationTypes] != UIRemoteNotificationTypeNone;
     }
-}
-
-//This method is meant for testing purposes. It simulates a notification event
-- (void)simulateNotification:(CDVInvokedUrlCommand*)command
-{
-    NSDictionary *dictionary = @{
-                                 @"data" : @(5)
-                                 };
-    [[[UIApplication sharedApplication] delegate] application:[UIApplication sharedApplication] didReceiveRemoteNotification:dictionary];
 }
 @end
 
