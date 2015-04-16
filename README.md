@@ -7,7 +7,7 @@ Using the following payload template, you can send messages to your service work
 {
     "aps" : {
 	"content-available" : 1,
-	"priority" : 5,
+	"priority" : 5
     },
     "foo" : [ "thing1", "thing2"]
 }
