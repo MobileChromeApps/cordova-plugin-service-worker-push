@@ -20,8 +20,10 @@
 #import <Cordova/CDV.h>
 #import "CDVPush.h"
 #import <JavaScriptCore/JavaScriptCore.h>
+#import <objc/runtime.h>
 
 NSString *DEVICE_TOKEN_STORAGE_KEY;
+CDVPush *this;
 
 @implementation CDVPush
 
@@ -30,11 +32,34 @@ NSString *DEVICE_TOKEN_STORAGE_KEY;
 
 - (void)setupPush:(CDVInvokedUrlCommand*)command
 {
-    DEVICE_TOKEN_STORAGE_KEY = [NSString stringWithFormat:@"%@/%@", @"CDVPush_devicetoken_", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"]];
-    self.serviceWorker = [(CDVViewController*)self.viewController getCommandInstance:@"ServiceWorker"];
+    DEVICE_TOKEN_STORAGE_KEY = @"CDVPush_devicetoken";
+    self.serviceWorker = [self.commandDelegate getCommandInstance:@"ServiceWorker"];
+    [self setupPushHandlers];
     [self setupSyncResponse];
+
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+}
+
+- (void)setupPushHandlers
+{
+    this = self;
+    if ([[[UIApplication sharedApplication] delegate] respondsToSelector:@selector(application:didReceiveRemoteNotification:)]) {
+        Method original, swizzled;
+        original = class_getInstanceMethod([self class], @selector(application:didReceiveRemoteNotification:));
+        swizzled = class_getInstanceMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:));
+        method_exchangeImplementations(original, swizzled);
+    } else {
+        class_addMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:), class_getMethodImplementation([self class], @selector(application:didReceiveRemoteNotification:)), nil);
+    }
+    if ([[[UIApplication sharedApplication] delegate] respondsToSelector:@selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+        Method original, swizzled;
+        original = class_getInstanceMethod([self class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:));
+        swizzled = class_getInstanceMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:));
+        method_exchangeImplementations(original, swizzled);
+    } else {
+        class_addMethod([[[UIApplication sharedApplication] delegate] class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:), class_getMethodImplementation([self class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)), nil);
+    }
 }
 
 - (void)hasPermission:(CDVInvokedUrlCommand*)command
@@ -56,20 +81,23 @@ NSString *DEVICE_TOKEN_STORAGE_KEY;
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
-    NSError *error;
-    NSData *json = [NSJSONSerialization dataWithJSONObject:userInfo options:0 error:&error];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
-    [serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
+    NSLog(@"Received remote notification");
+    [this dispatchPushEvent:userInfo];
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
 {
-    self.completionHandler = completionHandler;
+    NSLog(@"Received background remote notification");
+    this.completionHandler = completionHandler;
+    [this dispatchPushEvent:userInfo];
+}
+
+- (void)dispatchPushEvent:(NSDictionary*) userInfo
+{
     NSError *error;
     NSData *json = [NSJSONSerialization dataWithJSONObject:userInfo options:0 error:&error];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent(JSON.parse('%@'));", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
-    [serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
-
+    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    [this.serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
 }
 
 - (void)setupSyncResponse
@@ -77,7 +105,7 @@ NSString *DEVICE_TOKEN_STORAGE_KEY;
     __weak CDVPush *weakSelf = self;
     serviceWorker.context[@"sendSyncResponse"] = ^(JSValue *responseType) {
         UIBackgroundFetchResult result;
-        switch ([responseType.toNumber integerValue]) {
+        switch ([responseType toInt32]) {
             case 0:
                 result = UIBackgroundFetchResultNewData;
                 break;
@@ -100,7 +128,6 @@ NSString *DEVICE_TOKEN_STORAGE_KEY;
     NSString *deviceToken = [command argumentAtIndex:0];
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:deviceToken forKey:DEVICE_TOKEN_STORAGE_KEY];
-    [defaults synchronize];
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -126,6 +153,15 @@ NSString *DEVICE_TOKEN_STORAGE_KEY;
     } else {
         return [[UIApplication sharedApplication] enabledRemoteNotificationTypes] != UIRemoteNotificationTypeNone;
     }
+}
+
+//This method is meant for testing purposes. It simulates a notification event
+- (void)simulateNotification:(CDVInvokedUrlCommand*)command
+{
+    NSDictionary *dictionary = @{
+                                 @"data" : @(5)
+                                 };
+    [[[UIApplication sharedApplication] delegate] application:[UIApplication sharedApplication] didReceiveRemoteNotification:dictionary];
 }
 @end
 

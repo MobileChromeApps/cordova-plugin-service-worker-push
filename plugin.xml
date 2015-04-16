@@ -7,7 +7,7 @@
     <license>Apache 2.0</license>
     <keywords>cordova,push</keywords>
 
-    <dependency id="org.apache.cordova.serviceworker" url="https://github.com/mwoghiren/cordova-plugin-serviceworker.git" />
+    <dependency id="org.apache.cordova.serviceworker" url="https://github.com/MobileChromeApps/cordova-plugin-serviceworker.git" />
     <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/phonegap-build/PushPlugin.git" />
 
     <js-module src="www/PushManager.js" name="PushManager">
@@ -15,6 +15,9 @@
     </js-module>
     <js-module src="www/PushSubscription.js" name="PushSubscription">
 	<clobbers target="PushSubscription" />
+    </js-module>
+    <js-module src="www/Enums.js" name="Enums">
+	<clobbers target="" />
     </js-module>
 
     <!-- Assets for use by service worker -->

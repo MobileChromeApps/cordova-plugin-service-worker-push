@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
 
-PushManager = function() {};
+function PushManager() {}
 
 PushManager.prototype.subscribe = function() {
     return new Promise(function(resolve, reject) {
@@ -12,12 +12,15 @@ PushManager.prototype.subscribe = function() {
 	var failure = function(err) {
 	    reject(err);
 	};
+	function testCallback() {
+	    console.log("ECB was called");
+	}
 	window.plugins.pushNotification.register(success, failure, 
 	{
 	    "badge":"true",
 	    "sound":"true",
 	    "alert":"true",
-	    "ecb":null
+	    "ecb":"testCallback"
 	});
     });
 };
@@ -38,10 +41,10 @@ PushManager.prototype.hasPermission = function() {
     return new Promise(function(resolve, reject) {
 	var success = function(status) {
 	    if (status === "granted") {
-		resolve(0);
+		resolve(PushPermissionStatus.granted);
 	    }
 	    if (status === "denied") {
-		resolve(1);
+		resolve(PushPermissionStatus.denied);
 	    }
 	};
 	var failure = function(err) {
