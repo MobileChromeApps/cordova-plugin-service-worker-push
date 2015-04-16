@@ -16,9 +16,6 @@
     <js-module src="www/PushSubscription.js" name="PushSubscription">
 	<clobbers target="PushSubscription" />
     </js-module>
-    <js-module src="www/Enums.js" name="Enums">
-	<clobbers target="" />
-    </js-module>
 
     <!-- Assets for use by service worker -->
     <asset src="www/sw_assets/pushevent.js" target="sw_assets/pushevent.js" />
