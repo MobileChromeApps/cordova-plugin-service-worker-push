@@ -8,11 +8,9 @@ Using the following payload template, you can send messages to your service work
     "aps" : {
 	"content-available" : 1,
 	"priority" : 5,
-	"property1" : "myDataString",
-	"property2" : "moreData",
-	...
-    }
+    },
+    "foo" : [ "thing1", "thing2"]
 }
 ```
-Replace property1 etc. with your own data. This data will be provided within the event object given to the push event handler in your service worker script.
+Replace foo with your own data. This data will be provided within the event object given to the push event handler in your service worker script.
 
