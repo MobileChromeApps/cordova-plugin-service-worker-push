@@ -26,10 +26,10 @@ PushEvent.constructor = PushEvent;
 PushSubscriptionChangeEvent.prototype = Object.create(ExtendableEvent.prototype);
 PushSubscriptionChangeEvent.constructor = PushSubscriptionChangeEvent;
 
-function FirePushEvent(data, fullData) {
+function FirePushEvent(data, APNSData) {
     var ev = new PushEvent();
     ev.data = new PushMessageData(data);
-    ev.fullData = fullData;
+    ev.APNSData = APNSData;
     dispatchEvent(ev);
     if (ev.promises instanceof Array) {
 	return Promise.all(ev.promises).then(function() {

@@ -95,7 +95,8 @@ static CDVPush *this;
 {
     NSError *error;
     NSData *json = [NSJSONSerialization dataWithJSONObject:userInfo options:0 error:&error];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent('%@', %@);", userInfo[@"data"], [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    NSString *data = userInfo[@"data"] ?: @"";
+    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent('%@', %@);", data, [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [this.serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
 }
 
