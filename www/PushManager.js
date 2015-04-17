@@ -3,10 +3,11 @@ var serviceWorker = require('org.apache.cordova.serviceworker.ServiceWorker');
 
 function PushManager() {}
 
-PushManager.prototype.subscribe = function() {
+PushManager.prototype.subscribe = function(options) {
     return new Promise(function(resolve, reject) {
+	options = options || {};
 	function callback(token) {
-	    exec(null, null, "Push", "storeDeviceToken", [token]);
+	    exec(null, null, "Push", "storeDeviceToken", [token, options.userVisible]);
 	    resolve(new PushSubscription(token));
 	}
 	window.plugins.pushNotification.register(callback, reject, 
@@ -28,9 +29,10 @@ PushManager.prototype.getSubscription = function() {
     });
 };
 
-PushManager.prototype.hasPermission = function() {
+PushManager.prototype.hasPermission = function(options) {
     return new Promise(function(resolve, reject) {
-	exec(resolve, reject, "Push", "hasPermission", []);
+	options = options || {};
+	exec(resolve, reject, "Push", "hasPermission", [options.userVisible]);
     });
 };
 
