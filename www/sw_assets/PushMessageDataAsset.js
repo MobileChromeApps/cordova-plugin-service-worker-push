@@ -1,15 +1,14 @@
-var PushMessageData = function(data) {
-    this.bytes = data;
-    return this;
-};
+function PushMessageData(data) {
+    this.bytes = unescape(encodeURIComponent(data));
+}
 
 PushMessageData.prototype.arrayBuffer = function() {
-    var characters = btoa(this.bytes).split('');
-    var array = [];
-    for (var i = 0; i < characters.length; i++) {
-	array.push(characters[i].charCodeAt(0));
+    var buffer = new ArrayBuffer(this.bytes.length);
+    var bufferView = new Uint8Array(buffer);
+    for (var i = 0; i < this.bytes.length; i++) {
+	bufferView[i] = this.bytes.charCodeAt(i);
     }
-    return new Uint8Array(array).buffer;
+    return buffer;
 };
 
 PushMessageData.prototype.blob = function() {

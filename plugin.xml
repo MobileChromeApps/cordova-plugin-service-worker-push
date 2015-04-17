@@ -32,7 +32,6 @@
 		<string>remote-notification</string>
 	    </array>
 	</config-file>
-	<header-file src="src/ios/CDVPush.h" />
 	<source-file src="src/ios/CDVPush.m" />
     </platform>
 </plugin>

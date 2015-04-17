@@ -17,22 +17,35 @@
  under the License.
  */
 
+#import <Cordova/CDVPlugin.h>
+#import "CDVServiceWorker.h"
 #import <Cordova/CDV.h>
-#import "CDVPush.h"
 #import <JavaScriptCore/JavaScriptCore.h>
 #import <objc/runtime.h>
 
-NSString *DEVICE_TOKEN_STORAGE_KEY;
-CDVPush *this;
+static NSString * const DEVICE_TOKEN_STORAGE_KEY = @"CDVPush_devicetoken";
+static NSString * const USER_VISIBLE_STORAGE_KEY = @"CDVPush_userVisible";
+
+@interface CDVPush : CDVPlugin {}
+
+typedef void(^Completion)(UIBackgroundFetchResult);
+
+@property (nonatomic, copy) Completion completionHandler;
+@property (nonatomic, strong) CDVServiceWorker *serviceWorker;
+@property (nonatomic, strong) JSValue *firePushEventContext;
+
+@end
+
+static CDVPush *this;
 
 @implementation CDVPush
 
 @synthesize completionHandler;
 @synthesize serviceWorker;
+@synthesize firePushEventContext;
 
 - (void)setupPush:(CDVInvokedUrlCommand*)command
 {
-    DEVICE_TOKEN_STORAGE_KEY = @"CDVPush_devicetoken";
     self.serviceWorker = [self.commandDelegate getCommandInstance:@"ServiceWorker"];
     [self setupPushHandlers];
     [self setupSyncResponse];
@@ -82,7 +95,7 @@ CDVPush *this;
 {
     NSError *error;
     NSData *json = [NSJSONSerialization dataWithJSONObject:userInfo options:0 error:&error];
-    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent(%@);", [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
+    NSString *dispatchCode = [NSString stringWithFormat:@"FirePushEvent('%@', %@);", userInfo[@"data"], [[NSString alloc] initWithData:json encoding:NSUTF8StringEncoding]];
     [this.serviceWorker.context performSelectorOnMainThread:@selector(evaluateScript:) withObject:dispatchCode waitUntilDone:NO];
 }
 
@@ -120,10 +133,13 @@ CDVPush *this;
 - (void)storeDeviceToken:(CDVInvokedUrlCommand*)command
 {
     NSString *deviceToken = [command argumentAtIndex:0];
+    BOOL userVisible = [[command argumentAtIndex:1] boolValue];
     NSString *oldToken = [[NSUserDefaults standardUserDefaults] objectForKey:DEVICE_TOKEN_STORAGE_KEY];
     if (![oldToken isEqualToString:deviceToken]) {
         [self dispatchSubscriptionChangeEvent];
     }
+    [[NSUserDefaults standardUserDefaults] setBool:userVisible forKey:USER_VISIBLE_STORAGE_KEY];
+    [[NSUserDefaults standardUserDefaults] setObject:deviceToken forKey:DEVICE_TOKEN_STORAGE_KEY];
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
