@@ -32,7 +32,6 @@ typedef void(^Completion)(UIBackgroundFetchResult);
 
 @property (nonatomic, copy) Completion completionHandler;
 @property (nonatomic, strong) CDVServiceWorker *serviceWorker;
-@property (nonatomic, strong) JSValue *firePushEventContext;
 
 @end
 
@@ -42,14 +41,12 @@ static CDVPush *this;
 
 @synthesize completionHandler;
 @synthesize serviceWorker;
-@synthesize firePushEventContext;
 
 - (void)setupPush:(CDVInvokedUrlCommand*)command
 {
     self.serviceWorker = [self.commandDelegate getCommandInstance:@"ServiceWorker"];
     [self setupPushHandlers];
     [self setupSyncResponse];
-
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
@@ -69,17 +66,11 @@ static CDVPush *this;
 
 - (void)hasPermission:(CDVInvokedUrlCommand*)command
 {
-    @try {
-        if ([self hasPermission]) {
-            CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"granted"];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-        } else {
-            CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"denied"];
-            [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
-        }
-    }
-    @catch (NSException *exception) {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[exception description]];
+    if ([self hasPermission]) {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"granted"];
+        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+    } else {
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"denied"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     }
 }
@@ -108,7 +99,7 @@ static CDVPush *this;
 - (void)setupSyncResponse
 {
     __weak CDVPush *weakSelf = self;
-    serviceWorker.context[@"sendSyncResponse"] = ^(JSValue *responseType) {
+    serviceWorker.context[@"CDVPush_sendSyncResponse"] = ^(JSValue *responseType) {
         UIBackgroundFetchResult result;
         switch ([responseType toInt32]) {
             case 0:
@@ -131,7 +122,7 @@ static CDVPush *this;
     };
 }
 
-- (void)storeDeviceToken:(CDVInvokedUrlCommand*)command
+- (void)storeSubscription:(CDVInvokedUrlCommand*)command
 {
     NSString *deviceToken = [command argumentAtIndex:0];
     BOOL userVisible = [[command argumentAtIndex:1] boolValue];
@@ -145,10 +136,9 @@ static CDVPush *this;
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
 }
 
-- (void)getDeviceToken:(CDVInvokedUrlCommand*)command
+- (void)getSubscription:(CDVInvokedUrlCommand*)command
 {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *token = [defaults objectForKey:DEVICE_TOKEN_STORAGE_KEY];
+    NSString *token = [[NSUserDefaults standardUserDefaults] objectForKey:DEVICE_TOKEN_STORAGE_KEY];
     if (token != nil) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:token];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];

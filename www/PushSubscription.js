@@ -27,7 +27,7 @@ function PushSubscription(deviceToken) {
 PushSubscription.prototype.unsubscribe = function() {
     return new Promise(function(resolve, reject) {
 	function callback () {
-	    exec(resolve, reject, "Push", "storeDeviceToken", ["", false]);    
+	    exec(resolve, reject, 'Push', 'storeDeviceToken', ['', false]);
 	}
 	window.plugins.pushNotification.unregister(callback, reject);
     });

@@ -33,12 +33,12 @@ function FirePushEvent(data, APNSData) {
     dispatchEvent(ev);
     if (ev.promises instanceof Array) {
 	return Promise.all(ev.promises).then(function() {
-	    sendSyncResponse(0);
+	    CDVPush_sendSyncResponse(0);
 	}, function() {
-	    sendSyncResponse(1);
+	    CDVPush_sendSyncResponse(1);
 	});
     } else {
-	sendSyncResponse(2);
+	CDVPush_sendSyncResponse(2);
     }
 }
 

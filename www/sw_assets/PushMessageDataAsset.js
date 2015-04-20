@@ -19,7 +19,7 @@ PushMessageData.prototype.json = function() {
     try{
 	return JSON.parse(decodeURIComponent(escape(this.bytes)));
     } catch(e) {
-	console.log("caught exception");
+	console.log('Exception in data.json');
 	throw e;
     }
 };
