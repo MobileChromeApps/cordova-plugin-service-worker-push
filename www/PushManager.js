@@ -7,7 +7,7 @@ PushManager.prototype.subscribe = function(options) {
     return new Promise(function(resolve, reject) {
 	options = options || {};
 	function callback(token) {
-	    exec(null, null, 'Push', 'storeSubscription', [token, options.userVisible]);
+	    exec(null, null, 'Push', 'storeSubscription', [token, options.userVisibleOnly]);
 	    resolve(new PushSubscription(token));
 	}
 	window.plugins.pushNotification.register(callback, reject, 
@@ -29,10 +29,10 @@ PushManager.prototype.getSubscription = function() {
     });
 };
 
-PushManager.prototype.hasPermission = function(options) {
+PushManager.prototype.permissionState = function(options) {
     return new Promise(function(resolve, reject) {
 	options = options || {};
-	exec(resolve, reject, 'Push', 'hasPermission', [options.userVisible]);
+	exec(resolve, reject, 'Push', 'permissionState', [options.userVisibleOnly]);
     });
 };
 

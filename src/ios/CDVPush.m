@@ -24,7 +24,7 @@
 #import <objc/runtime.h>
 
 static NSString * const DEVICE_TOKEN_STORAGE_KEY = @"CDVPush_devicetoken";
-static NSString * const USER_VISIBLE_STORAGE_KEY = @"CDVPush_userVisible";
+static NSString * const USER_VISIBLE_STORAGE_KEY = @"CDVPush_userVisibleOnly";
 
 @interface CDVPush : CDVPlugin {}
 
@@ -64,9 +64,9 @@ static CDVPush *this;
     }
 }
 
-- (void)hasPermission:(CDVInvokedUrlCommand*)command
+- (void)permissionState:(CDVInvokedUrlCommand*)command
 {
-    if ([self hasPermission]) {
+    if ([self permissionState]) {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"granted"];
         [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
     } else {
@@ -125,12 +125,12 @@ static CDVPush *this;
 - (void)storeSubscription:(CDVInvokedUrlCommand*)command
 {
     NSString *deviceToken = [command argumentAtIndex:0];
-    BOOL userVisible = [[command argumentAtIndex:1] boolValue];
+    BOOL userVisibleOnly = [[command argumentAtIndex:1] boolValue];
     NSString *oldToken = [[NSUserDefaults standardUserDefaults] objectForKey:DEVICE_TOKEN_STORAGE_KEY];
     if (![oldToken isEqualToString:deviceToken]) {
         [self dispatchSubscriptionChangeEvent];
     }
-    [[NSUserDefaults standardUserDefaults] setBool:userVisible forKey:USER_VISIBLE_STORAGE_KEY];
+    [[NSUserDefaults standardUserDefaults] setBool:userVisibleOnly forKey:USER_VISIBLE_STORAGE_KEY];
     [[NSUserDefaults standardUserDefaults] setObject:deviceToken forKey:DEVICE_TOKEN_STORAGE_KEY];
     CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
@@ -148,7 +148,7 @@ static CDVPush *this;
     }
 }
 
-- (BOOL)hasPermission
+- (BOOL)permissionState
 {
     if ([[UIApplication sharedApplication] respondsToSelector:@selector(isRegisteredForRemoteNotifications)])
     {
