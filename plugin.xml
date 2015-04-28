@@ -7,7 +7,7 @@
     <license>Apache 2.0</license>
     <keywords>cordova,push</keywords>
 
-    <dependency id="cordova-plugin-service-worker" url="https://github.com/MobileChromeApps/cordova-plugin-serviceworker.git" />
+    <dependency id="cordova-plugin-service-worker" url="https://github.com/MobileChromeApps/cordova-plugin-service-worker.git" />
     <dependency id="com.phonegap.plugins.PushPlugin" url="https://github.com/phonegap-build/PushPlugin.git" />
 
     <js-module src="www/PushManager.js" name="PushManager">
