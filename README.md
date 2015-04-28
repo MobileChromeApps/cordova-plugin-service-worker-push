@@ -8,8 +8,14 @@ If your server has new content, it can send a silent push to wake up your app (e
 ##Installation
 To add this plugin to your project using cordova cli
 ```
-cordova plugin add https://github.com/imintz/cordova-plugin-push.git
+cordova plugin add https://github.com/MobileChromeApps/cordova-plugin-push.git
 ```
+
+or, to install from npm:
+```
+cordova plugin add cordova-plugin-push
+```
+
 To uninstall this plugin
 ```
 cordova plugin rm cordova-plugin-push
