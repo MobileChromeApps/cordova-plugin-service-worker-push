@@ -63,3 +63,5 @@ Using the following payload template, you can send messages to your service work
 ```
 Replace the contents of ```data``` with your own data. This data will be provided within the event object given to the push event handler in your service worker script.
 
+##1.0.0 (April 29, 2015)
+* Initial release

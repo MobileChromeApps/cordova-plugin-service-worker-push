@@ -1,0 +1,27 @@
+{
+  "name": "cordova-plugin-push",
+  "version": "1.0.0",
+  "description": "Push Plugin",
+  "cordova": {
+    "id": "cordova-plugin-push",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MobileChromeApps/cordova-plugin-push.git"
+  },
+  "keywords": [
+    "cordova",
+    "push",
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "author": "The Chrome Team",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/MobileChromeApps/cordova-plugin-push/issues"
+  },
+  "homepage": "https://github.com/MobileChromeApps/cordova-plugin-push#readme"
+}
