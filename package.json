@@ -1,27 +1,29 @@
 {
-  "name": "cordova-plugin-push",
+  "name": "cordova-plugin-service-worker-push",
   "version": "1.0.0",
-  "description": "Push Plugin",
+  "description": "Push plugin for Cordova Service Worker",
   "cordova": {
-    "id": "cordova-plugin-push",
+    "id": "cordova-plugin-service-worker-push",
     "platforms": [
       "ios"
     ]
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MobileChromeApps/cordova-plugin-push.git"
+    "url": "git+https://github.com/MobileChromeApps/cordova-plugin-service-worker-push.git"
   },
   "keywords": [
     "cordova",
     "push",
+    "service",
+    "worker",
     "ecosystem:cordova",
     "cordova-ios"
   ],
   "author": "The Chrome Team",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/MobileChromeApps/cordova-plugin-push/issues"
+    "url": "https://github.com/MobileChromeApps/cordova-plugin-service-worker-push/issues"
   },
-  "homepage": "https://github.com/MobileChromeApps/cordova-plugin-push#readme"
+  "homepage": "https://github.com/MobileChromeApps/cordova-plugin-service-worker-push#readme"
 }
